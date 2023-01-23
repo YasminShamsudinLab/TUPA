@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --gpus-per-task=1
+#SBATCH --job-name=JOBX
+#SBATCH --exclusive
+#SBATCH --nodes=1
+#SBATCH --time=TIMEX:00:00
+#SBATCH --account=snic2022-5-544
+#SBATCH --mail-type=ALL
+
+module load GROMACS/2021.3-nsc2-gcccuda-11.4-9.3.0-bare
+
+gmx trjconv -s md_2_22.tpr -f md_2_22.xtc -o md_2_22_center.xtc -center -pbc mol -ur compact < center.in
+
+module load Anaconda/2021.05-nsc1
+conda activate myenv
+
+~/tupa/TUPA.py -top md_2_22.tpr -traj md_2_22_center.xtc -config full_system.conf -outdir CENTERED_FULL
+
+~/tupa/TUPA.py -top md_2_22.tpr -traj md_2_22_center.xtc -config water_only.conf -outdir CENTERED_WATER
+
+~/tupa/TUPA.py -top md_2_22.tpr -traj md_2_22_center.xtc -config ligand.conf -outdir CENTERED_LIG
+
+~/tupa/TUPA.py -top md_2_22.tpr -traj md_2_22_center.xtc -config protein_only.conf -outdir CENTERED_PROT
